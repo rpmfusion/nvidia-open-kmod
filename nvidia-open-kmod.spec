@@ -12,7 +12,7 @@ Name:          nvidia-open-kmod
 Epoch:         3
 Version:       515.57
 # Taken over by kmodtool
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
@@ -77,6 +77,10 @@ done
 
 
 %changelog
+* Mon Aug 08 2022 RPM Fusion Release Engineering <sergiomb@rpmfusion.org> - 3:515.57-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild and ffmpeg
+  5.1
+
 * Mon Jul 04 2022 Nicolas Chauvet <kwizart@gmail.com> - 3:515.57-1
 - Update to 515.57
 
