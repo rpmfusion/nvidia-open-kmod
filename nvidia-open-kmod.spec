@@ -10,7 +10,7 @@
 
 Name:          nvidia-open-kmod
 Epoch:         3
-Version:       515.65.01
+Version:       525.89.02
 # Taken over by kmodtool
 Release:       1%{?dist}
 Summary:       NVIDIA open display driver kernel module
@@ -20,7 +20,7 @@ URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
 Source0:       %{url}/archive/%{version}/open-gpu-kernel-modules-%{version}.tar.gz
 Source11:      nvidia-open-kmodtool-excludekernel-filterfile
 
-ExclusiveArch:  x86_64 aarch64 ppc64le
+ExclusiveArch:  x86_64 aarch64
 
 # get the needed BuildRequires (in parts depending on what we build for)
 %global AkmodsBuildRequires %{_bindir}/kmodtool
@@ -77,6 +77,30 @@ done
 
 
 %changelog
+* Fri Feb 10 2023 Leigh Scott <leigh123linux@gmail.com> - 3:525.89.02-1
+- Update to 525.89.02
+
+* Thu Jan 19 2023 Leigh Scott <leigh123linux@gmail.com> - 3:525.85.05-1
+- Update to 525.85.05
+
+* Thu Jan 05 2023 Leigh Scott <leigh123linux@gmail.com> - 3:525.78.01-1
+- Update to 525.78.01
+
+* Sun Dec 11 2022 Nicolas Chauvet <kwizart@gmail.com> - 3:525.60.11-1
+- Update to 525.60.11
+
+* Thu Nov 10 2022 Leigh Scott <leigh123linux@gmail.com> - 3:525.53-1
+- Update to 525.53 beta
+
+* Wed Nov 09 2022 Nicolas Chauvet <kwizart@gmail.com> - 3:520.56.06-2
+- Add gcc-g++ - rfbz#6473
+
+* Tue Nov 08 2022 Nicolas Chauvet <kwizart@gmail.com> - 3:520.56.06-1
+- Update to 520.56.06
+
+* Wed Sep 21 2022 Leigh Scott <leigh123linux@gmail.com> - 3:515.76-1
+- Update to 515.76
+
 * Mon Aug 08 2022 Leigh Scott <leigh123linux@gmail.com> - 3:515.65.01-1
 - Update to 515.65.01
 
