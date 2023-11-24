@@ -10,7 +10,7 @@
 
 Name:          nvidia-open-kmod
 Epoch:         3
-Version:       525.116.04
+Version:       545.29.06
 # Taken over by kmodtool
 Release:       1%{?dist}
 Summary:       NVIDIA open display driver kernel module
@@ -23,10 +23,10 @@ Source11:      nvidia-open-kmodtool-excludekernel-filterfile
 ExclusiveArch:  x86_64 aarch64
 
 # get the needed BuildRequires (in parts depending on what we build for)
-%global AkmodsBuildRequires %{_bindir}/kmodtool
+%global AkmodsBuildRequires %{_bindir}/kmodtool, gcc-c++, elfutils-libelf-devel
 BuildRequires:  %{AkmodsBuildRequires}
 
-%{!?kernels:BuildRequires: gcc-c++, elfutils-libelf-devel, buildsys-build-rpmfusion-kerneldevpkgs-%{?buildforkernels:%{buildforkernels}}%{!?buildforkernels:current}-%{_target_cpu} }
+%{!?kernels:BuildRequires: buildsys-build-rpmfusion-kerneldevpkgs-%{?buildforkernels:%{buildforkernels}}%{!?buildforkernels:current}-%{_target_cpu} }
 # kmodtool does its magic here
 %{expand:%(kmodtool --target %{_target_cpu} --repo rpmfusion --kmodname %{name} --filterfile %{SOURCE11} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null) }
 
@@ -77,8 +77,38 @@ done
 
 
 %changelog
-* Wed May 17 2023 Nicolas Chauvet <kwizart@gmail.com> - 3:525.116.04-1
-- Update to 525.116.04
+* Wed Nov 22 2023 Leigh Scott <leigh123linux@gmail.com> - 3:545.29.06-1
+- Update to 545.29.06 release
+
+* Wed Oct 18 2023 Leigh Scott <leigh123linux@gmail.com> - 3:545.23.06-1
+- Update to 545.23.06 beta
+
+* Fri Sep 22 2023 Leigh Scott <leigh123linux@gmail.com> - 3:535.113.01-1
+- Update to 535.113.01
+
+* Tue Aug 22 2023 Leigh Scott <leigh123linux@gmail.com> - 3:535.104.05-1
+- Update to 535.104.05
+
+* Wed Aug 09 2023 Leigh Scott <leigh123linux@gmail.com> - 3:535.98-1
+- Update to 535.98
+
+* Thu Aug 03 2023 RPM Fusion Release Engineering <sergiomb@rpmfusion.org> - 3:535.86.05-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Tue Jul 18 2023 Leigh Scott <leigh123linux@gmail.com> - 3:535.86.05-1
+- Update to 535.86.05
+
+* Thu Jun 15 2023 Leigh Scott <leigh123linux@gmail.com> - 3:535.54.03-1
+- Update to 535.54.03
+
+* Tue May 30 2023 Leigh Scott <leigh123linux@gmail.com> - 3:535.43.02-1
+- Update to 535.43.02 beta
+
+* Fri Mar 24 2023 Leigh Scott <leigh123linux@gmail.com> - 3:530.41.03-1
+- Update to 530.41.03
+
+* Sun Mar 05 2023 Leigh Scott <leigh123linux@gmail.com> - 3:530.30.02-1
+- Update to 530.30.02 beta
 
 * Fri Feb 10 2023 Leigh Scott <leigh123linux@gmail.com> - 3:525.89.02-1
 - Update to 525.89.02
