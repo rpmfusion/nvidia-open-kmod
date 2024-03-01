@@ -12,13 +12,14 @@ Name:          nvidia-open-kmod
 Epoch:         3
 Version:       550.54.14
 # Taken over by kmodtool
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
 
 Source0:       %{url}/archive/%{version}/open-gpu-kernel-modules-%{version}.tar.gz
 Source11:      nvidia-open-kmodtool-excludekernel-filterfile
+Patch0:        gcc14.patch
 
 ExclusiveArch:  x86_64 aarch64
 
@@ -40,6 +41,8 @@ The nvidia open %{version} display driver kernel module for kernel %{kversion}.
 kmodtool  --target %{_target_cpu}  --repo rpmfusion --kmodname %{name} --filterfile %{SOURCE11} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null
 %setup -q -c
 # patch loop
+ls
+%patch -P0 -p1 -d open-gpu-kernel-modules-%{version}
 %if 0%{?_without_nvidia_kmod_patches:1}
 # placeholder
 %endif
@@ -77,6 +80,9 @@ done
 
 
 %changelog
+* Fri Mar 01 2024 Leigh Scott <leigh123linux@gmail.com> - 3:550.54.14-2
+- Fix gcc14 compile issue (rfbz#6882)
+
 * Sat Feb 24 2024 Leigh Scott <leigh123linux@gmail.com> - 3:550.54.14-1
 - Update to 550.54.14 release
 
