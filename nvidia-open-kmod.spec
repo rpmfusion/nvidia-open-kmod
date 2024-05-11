@@ -12,7 +12,7 @@ Name:          nvidia-open-kmod
 Epoch:         3
 Version:       550.78
 # Taken over by kmodtool
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
@@ -80,6 +80,9 @@ done
 
 
 %changelog
+* Sat May 11 2024 Leigh Scott <leigh123linux@gmail.com> - 3:550.78-3
+- Adjust patch to disable nvidia fbdev
+
 * Sat May 11 2024 Leigh Scott <leigh123linux@gmail.com> - 3:550.78-2
 - Default enable nvidia modeset and fbdev
 
