@@ -12,7 +12,7 @@ Name:          nvidia-open-kmod
 Epoch:         3
 Version:       555.42.02
 # Taken over by kmodtool
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
@@ -20,6 +20,7 @@ URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
 Source0:       %{url}/archive/%{version}/open-gpu-kernel-modules-%{version}.tar.gz
 Source11:      nvidia-open-kmodtool-excludekernel-filterfile
 Patch0:        make_modeset_default.patch
+Patch1:        kernel-610.patch
 
 ExclusiveArch:  x86_64 aarch64
 
@@ -40,12 +41,14 @@ The nvidia open %{version} display driver kernel module for kernel %{kversion}.
 # print kmodtool output for debugging purposes:
 kmodtool  --target %{_target_cpu}  --repo rpmfusion --kmodname %{name} --filterfile %{SOURCE11} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null
 %setup -q -c
-ls
 # patch loop
+%if 0%{?_with_nvidia_defaults:1}
+echo "Using original nvidia defaults"
+%else
+echo "Set nvidia to fbdev=1 modeset=1"
 %patch 0 -p1 -d open-gpu-kernel-modules-%{version}
-%if 0%{?_without_nvidia_kmod_patches:1}
-# placeholder
 %endif
+%patch 1 -p1 -d open-gpu-kernel-modules-%{version}
 
 for kernel_version  in %{?kernel_versions} ; do
     cp -a open-gpu-kernel-modules-%{version} _kmod_build_${kernel_version%%___*}
@@ -80,6 +83,9 @@ done
 
 
 %changelog
+* Sat Jun 01 2024 Leigh Scott <leigh123linux@gmail.com> - 3:555.42.02-2
+- Patch for kernel-6.10rc
+
 * Tue May 21 2024 Leigh Scott <leigh123linux@gmail.com> - 3:555.42.02-1
 - Update to 555.42.02 beta
 
