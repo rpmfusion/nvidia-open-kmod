@@ -10,7 +10,7 @@
 
 Name:          nvidia-open-kmod
 Epoch:         3
-Version:       550.90.07
+Version:       555.58
 # Taken over by kmodtool
 Release:       1%{?dist}
 Summary:       NVIDIA open display driver kernel module
@@ -40,11 +40,12 @@ The nvidia open %{version} display driver kernel module for kernel %{kversion}.
 # print kmodtool output for debugging purposes:
 kmodtool  --target %{_target_cpu}  --repo rpmfusion --kmodname %{name} --filterfile %{SOURCE11} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null
 %setup -q -c
-ls
 # patch loop
+%if 0%{?_with_nvidia_defaults:1}
+echo "Using original nvidia defaults"
+%else
+echo "Set nvidia to fbdev=1 modeset=1"
 %patch 0 -p1 -d open-gpu-kernel-modules-%{version}
-%if 0%{?_without_nvidia_kmod_patches:1}
-# placeholder
 %endif
 
 for kernel_version  in %{?kernel_versions} ; do
@@ -80,8 +81,17 @@ done
 
 
 %changelog
-* Thu Jun 06 2024 Leigh Scott <leigh123linux@gmail.com> - 3:550.90.07-1
-- Update to 550.90.07 release
+* Thu Jun 27 2024 Leigh Scott <leigh123linux@gmail.com> - 3:555.58-1
+- Update to 555.58 release
+
+* Thu Jun 06 2024 Leigh Scott <leigh123linux@gmail.com> - 3:555.52.04-1
+- Update to 555.52.04 beta
+
+* Sat Jun 01 2024 Leigh Scott <leigh123linux@gmail.com> - 3:555.42.02-2
+- Patch for kernel-6.10rc
+
+* Tue May 21 2024 Leigh Scott <leigh123linux@gmail.com> - 3:555.42.02-1
+- Update to 555.42.02 beta
 
 * Sat May 11 2024 Leigh Scott <leigh123linux@gmail.com> - 3:550.78-3
 - Adjust patch to disable nvidia fbdev
