@@ -12,7 +12,7 @@ Name:          nvidia-open-kmod
 Epoch:         3
 Version:       560.31.02
 # Taken over by kmodtool
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
@@ -20,6 +20,7 @@ URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
 Source0:       %{url}/archive/%{version}/open-gpu-kernel-modules-%{version}.tar.gz
 Source11:      nvidia-open-kmodtool-excludekernel-filterfile
 Patch0:        make_modeset_default.patch
+Patch1:        %{url}/pull/692.patch#/kernel-611-framebuffer.patch
 
 ExclusiveArch:  x86_64 aarch64
 
@@ -47,6 +48,7 @@ echo "Using original nvidia defaults"
 echo "Set nvidia to fbdev=1 modeset=1"
 %patch 0 -p1 -d open-gpu-kernel-modules-%{version}
 %endif
+%patch 1 -p1 -d open-gpu-kernel-modules-%{version}
 
 for kernel_version  in %{?kernel_versions} ; do
     cp -a open-gpu-kernel-modules-%{version} _kmod_build_${kernel_version%%___*}
@@ -81,6 +83,10 @@ done
 
 
 %changelog
+* Mon Aug 19 2024 Leigh Scott <leigh123linux@gmail.com> - 3:560.31.02-2
+- Enable nvidia fbdev
+- Fix nvidia framebuffer with 6.11rc
+
 * Tue Aug 06 2024 Leigh Scott <leigh123linux@gmail.com> - 3:560.31.02-1
 - Update to 560.31.02 beta
 
