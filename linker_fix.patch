@@ -1,5 +1,14 @@
 --- a/src/nvidia/Makefile
 +++ b/src/nvidia/Makefile
+@@ -148,7 +148,7 @@ endif
+ # unreachable.
+ CFLAGS += -ffunction-sections
+ CFLAGS += -fdata-sections
+-NV_KERNEL_O_LDFLAGS += --gc-sections
++NV_KERNEL_O_LDFLAGS += '$(LDFLAGS)'
+ EXPORTS_LINK_COMMAND = exports_link_command.txt
+ 
+ ifeq ($(TARGET_ARCH),x86_64)
 @@ -208,8 +208,6 @@ all: $(NV_KERNEL_O)
  
  LINKER_SCRIPT = nv-kernel.ld
