@@ -10,7 +10,7 @@
 
 Name:          nvidia-open-kmod
 Epoch:         3
-Version:       560.35.03
+Version:       565.77
 # Taken over by kmodtool
 Release:       1%{?dist}
 Summary:       NVIDIA open display driver kernel module
@@ -20,7 +20,7 @@ URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
 Source0:       %{url}/archive/%{version}/open-gpu-kernel-modules-%{version}.tar.gz
 Source11:      nvidia-open-kmodtool-excludekernel-filterfile
 Patch0:        make_modeset_default.patch
-Patch1:        %{url}/pull/692.patch#/kernel-611-framebuffer.patch
+Patch1:        linker_fix.patch
 
 ExclusiveArch:  x86_64 aarch64
 
@@ -64,7 +64,7 @@ export NV_EXCLUDE_KERNEL_MODULES="${NV_EXCLUDE_KERNEL_MODULES} nvidia_modeset "
 
 for kernel_version in %{?kernel_versions}; do
   pushd _kmod_build_${kernel_version%%___*}/
-    make V=1 %{?_smp_mflags} CC=gcc \
+    %make_build \
         KERNEL_UNAME="${kernel_version%%___*}" SYSSRC="${kernel_version##*___}" \
         IGNORE_CC_MISMATCH=1 IGNORE_XEN_PRESENCE=1 IGNORE_PREEMPT_RT_PRESENCE=1 \
         modules
@@ -83,6 +83,15 @@ done
 
 
 %changelog
+* Thu Dec 05 2024 Leigh Scott <leigh123linux@gmail.com> - 3:565.77-1
+- Update to 565.77 release
+
+* Wed Oct 30 2024 Leigh Scott <leigh123linux@gmail.com> - 3:565.57.01-2
+- Fix linker issue
+
+* Tue Oct 22 2024 Leigh Scott <leigh123linux@gmail.com> - 3:565.57.01-1
+- Update to 565.57.01 beta
+
 * Wed Aug 21 2024 Leigh Scott <leigh123linux@gmail.com> - 3:560.35.03-1
 - Update to 560.35.03 Release
 
