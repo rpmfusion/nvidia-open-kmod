@@ -10,7 +10,7 @@
 
 Name:          nvidia-open-kmod
 Epoch:         3
-Version:       570.86.16
+Version:       570.124.04
 # Taken over by kmodtool
 Release:       1%{?dist}
 Summary:       NVIDIA open display driver kernel module
@@ -83,6 +83,9 @@ done
 
 
 %changelog
+* Thu Feb 27 2025 Leigh Scott <leigh123linux@gmail.com> - 3:570.124.04-1
+- Update to 570.124.04 release
+
 * Thu Jan 30 2025 Leigh Scott <leigh123linux@gmail.com> - 3:570.86.16-1
 - Update to 570.86.16 beta
 
