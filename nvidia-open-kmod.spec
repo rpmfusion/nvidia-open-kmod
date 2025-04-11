@@ -13,7 +13,7 @@ Name:          nvidia-open-kmod
 Epoch:         3
 Version:       570.133.07
 # Taken over by kmodtool
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
@@ -56,6 +56,7 @@ for kernel_version  in %{?kernel_versions} ; do
 done
 
 %build
+export CC+=" -std=gnu17"
 %if 0%{?_without_nvidia_uvm:1}
 export NV_EXCLUDE_KERNEL_MODULES="${NV_EXCLUDE_KERNEL_MODULES} nvidia_uvm "
 %endif
@@ -84,6 +85,9 @@ done
 
 
 %changelog
+* Fri Apr 11 2025 Leigh Scott <leigh123linux@gmail.com> - 3:570.133.07-2
+- Force build to use std=gnu17
+
 * Tue Mar 18 2025 Leigh Scott <leigh123linux@gmail.com> - 3:570.133.07-1
 - Update to 570.133.07 release
 
