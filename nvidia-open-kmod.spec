@@ -13,7 +13,7 @@ Name:          nvidia-open-kmod
 Epoch:         3
 Version:       575.51.02
 # Taken over by kmodtool
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
@@ -22,7 +22,7 @@ Source0:       %{url}/archive/%{version}/open-gpu-kernel-modules-%{version}.tar.
 Source11:      nvidia-open-kmodtool-excludekernel-filterfile
 Patch0:        make_modeset_default.patch
 Patch1:        linker_fix.patch
-Patch2:        nvidia-kernel-ccflags-y.patch
+Patch2:        kernel-open-6.15_buildfix.patch
 
 ExclusiveArch:  x86_64 aarch64
 
@@ -86,6 +86,9 @@ done
 
 
 %changelog
+* Sun Apr 27 2025 Leigh Scott <leigh123linux@gmail.com> - 3:575.51.02-3
+- Patch for kernel-6.15rc
+
 * Thu Apr 24 2025 Nicolas Chauvet <kwizart@gmail.com> - 3:575.51.02-2
 - Add obsoletes/provides nvidia-kmod
 
