@@ -11,7 +11,7 @@
 
 Name:          nvidia-open-kmod
 Epoch:         3
-Version:       570.153.02
+Version:       575.57.08
 # Taken over by kmodtool
 Release:       1%{?dist}
 Summary:       NVIDIA open display driver kernel module
@@ -31,7 +31,7 @@ BuildRequires:  %{AkmodsBuildRequires}
 
 %{!?kernels:BuildRequires: buildsys-build-rpmfusion-kerneldevpkgs-%{?buildforkernels:%{buildforkernels}}%{!?buildforkernels:current}-%{_target_cpu} }
 # kmodtool does its magic here
-%{expand:%(kmodtool --target %{_target_cpu} --repo rpmfusion --kmodname %{name} --filterfile %{SOURCE11} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null) }
+%{expand:%(kmodtool --target %{_target_cpu} --repo rpmfusion --kmodname %{name} --obsolete-name nvidia-kmod --obsolete-version %{version}-0.1 --filterfile %{SOURCE11} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null) }
 
 %description
 The nvidia open %{version} display driver kernel module for kernel %{kversion}.
@@ -40,7 +40,7 @@ The nvidia open %{version} display driver kernel module for kernel %{kversion}.
 # error out if there was something wrong with kmodtool
 %{?kmodtool_check}
 # print kmodtool output for debugging purposes:
-kmodtool  --target %{_target_cpu}  --repo rpmfusion --kmodname %{name} --filterfile %{SOURCE11} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null
+kmodtool  --target %{_target_cpu}  --repo rpmfusion --kmodname %{name} --obsolete-name nvidia-kmod --obsolete-version %{version}-0.1 --filterfile %{SOURCE11} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null
 %setup -q -c
 # patch loop
 %if 0%{?_with_nvidia_defaults:1}
@@ -84,11 +84,17 @@ done
 
 
 %changelog
-* Mon May 19 2025 Leigh Scott <leigh123linux@gmail.com> - 3:570.153.02-1
-- Update to 570.153.02 release
+* Thu May 29 2025 Leigh Scott <leigh123linux@gmail.com> - 3:575.57.08-1
+- Update to 575.57.08 release
 
-* Tue Apr 22 2025 Leigh Scott <leigh123linux@gmail.com> - 3:570.144-1
-- Update to 570.144 release
+* Sun Apr 27 2025 Leigh Scott <leigh123linux@gmail.com> - 3:575.51.02-3
+- Patch for kernel-6.15rc
+
+* Thu Apr 24 2025 Nicolas Chauvet <kwizart@gmail.com> - 3:575.51.02-2
+- Add obsoletes/provides nvidia-kmod
+
+* Wed Apr 16 2025 Leigh Scott <leigh123linux@gmail.com> - 3:575.51.02-1
+- Update to 575.51.02 beta
 
 * Fri Apr 11 2025 Leigh Scott <leigh123linux@gmail.com> - 3:570.133.07-2
 - Force build to use std=gnu17
