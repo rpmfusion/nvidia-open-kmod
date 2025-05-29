@@ -11,9 +11,9 @@
 
 Name:          nvidia-open-kmod
 Epoch:         3
-Version:       575.51.02
+Version:       575.57.08
 # Taken over by kmodtool
-Release:       3%{?dist}
+Release:       1%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
@@ -22,7 +22,6 @@ Source0:       %{url}/archive/%{version}/open-gpu-kernel-modules-%{version}.tar.
 Source11:      nvidia-open-kmodtool-excludekernel-filterfile
 Patch0:        make_modeset_default.patch
 Patch1:        linker_fix.patch
-Patch2:        kernel-open-6.15_buildfix.patch
 
 ExclusiveArch:  x86_64 aarch64
 
@@ -51,7 +50,6 @@ echo "Set nvidia to fbdev=1 modeset=1"
 %patch 0 -p1 -d open-gpu-kernel-modules-%{version}
 %endif
 %patch 1 -p1 -d open-gpu-kernel-modules-%{version}
-%patch 2 -p1 -d open-gpu-kernel-modules-%{version}
 
 for kernel_version  in %{?kernel_versions} ; do
     cp -a open-gpu-kernel-modules-%{version} _kmod_build_${kernel_version%%___*}
@@ -86,6 +84,9 @@ done
 
 
 %changelog
+* Thu May 29 2025 Leigh Scott <leigh123linux@gmail.com> - 3:575.57.08-1
+- Update to 575.57.08 release
+
 * Sun Apr 27 2025 Leigh Scott <leigh123linux@gmail.com> - 3:575.51.02-3
 - Patch for kernel-6.15rc
 
