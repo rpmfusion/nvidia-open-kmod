@@ -7,10 +7,11 @@
 %global buildforkernels akmod
 %endif
 %global debug_package %{nil}
+%global _kmodtool_zipmodules 0
 
 Name:          nvidia-open-kmod
 Epoch:         3
-Version:       550.144.03
+Version:       570.169
 # Taken over by kmodtool
 Release:       1%{?dist}
 Summary:       NVIDIA open display driver kernel module
@@ -19,6 +20,8 @@ URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
 
 Source0:       %{url}/archive/%{version}/open-gpu-kernel-modules-%{version}.tar.gz
 Source11:      nvidia-open-kmodtool-excludekernel-filterfile
+Patch0:        make_modeset_default.patch
+Patch1:        linker_fix.patch
 
 ExclusiveArch:  x86_64 aarch64
 
@@ -40,9 +43,13 @@ The nvidia open %{version} display driver kernel module for kernel %{kversion}.
 kmodtool  --target %{_target_cpu}  --repo rpmfusion --kmodname %{name} --filterfile %{SOURCE11} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null
 %setup -q -c
 # patch loop
-%if 0%{?_without_nvidia_kmod_patches:1}
-# placeholder
+%if 0%{?_with_nvidia_defaults:1}
+echo "Using original nvidia defaults"
+%else
+echo "Set nvidia to fbdev=1 modeset=1"
+%patch 0 -p1 -d open-gpu-kernel-modules-%{version}
 %endif
+%patch 1 -p1 -d open-gpu-kernel-modules-%{version}
 
 for kernel_version  in %{?kernel_versions} ; do
     cp -a open-gpu-kernel-modules-%{version} _kmod_build_${kernel_version%%___*}
@@ -58,7 +65,7 @@ export NV_EXCLUDE_KERNEL_MODULES="${NV_EXCLUDE_KERNEL_MODULES} nvidia_modeset "
 
 for kernel_version in %{?kernel_versions}; do
   pushd _kmod_build_${kernel_version%%___*}/
-    make V=1 %{?_smp_mflags} CC=gcc \
+    %make_build \
         KERNEL_UNAME="${kernel_version%%___*}" SYSSRC="${kernel_version##*___}" \
         IGNORE_CC_MISMATCH=1 IGNORE_XEN_PRESENCE=1 IGNORE_PREEMPT_RT_PRESENCE=1 \
         modules
@@ -77,17 +84,81 @@ done
 
 
 %changelog
-* Thu Jan 30 2025 Nicolas Chauvet <kwizart@gmail.com> - 3:550.144.03-1
-- Update to 550.144.03
+* Tue Jun 24 2025 Nicolas Chauvet <kwizart@gmail.com> - 3:570.169-1
+- Update to 570.169
 
-* Wed Oct 30 2024 Nicolas Chauvet <kwizart@gmail.com> - 3:550.127.05-1
-- Update to 550.127.05
+* Mon May 19 2025 Leigh Scott <leigh123linux@gmail.com> - 3:570.153.02-1
+- Update to 570.153.02 release
 
-* Fri Aug 30 2024 Nicolas Chauvet <kwizart@gmail.com> - 3:550.107.02-1
-- Update to 550.107.02
+* Tue Apr 22 2025 Leigh Scott <leigh123linux@gmail.com> - 3:570.144-1
+- Update to 570.144 release
 
-* Fri Jul 19 2024 Nicolas Chauvet <kwizart@gmail.com> - 3:550.100-1
-- Update to 550.100
+* Fri Apr 11 2025 Leigh Scott <leigh123linux@gmail.com> - 3:570.133.07-2
+- Force build to use std=gnu17
+
+* Tue Mar 18 2025 Leigh Scott <leigh123linux@gmail.com> - 3:570.133.07-1
+- Update to 570.133.07 release
+
+* Thu Mar 06 2025 Leigh Scott <leigh123linux@gmail.com> - 3:570.124.04-2
+- Disable module compression everywhere
+
+* Thu Feb 27 2025 Leigh Scott <leigh123linux@gmail.com> - 3:570.124.04-1
+- Update to 570.124.04 release
+
+* Thu Jan 30 2025 Leigh Scott <leigh123linux@gmail.com> - 3:570.86.16-1
+- Update to 570.86.16 beta
+
+* Wed Jan 29 2025 RPM Fusion Release Engineering <sergiomb@rpmfusion.org> - 3:565.77-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_42_Mass_Rebuild
+
+* Fri Dec 13 2024 Leigh Scott <leigh123linux@gmail.com> - 3:565.77-2
+- Fix linker patch
+
+* Thu Dec 05 2024 Leigh Scott <leigh123linux@gmail.com> - 3:565.77-1
+- Update to 565.77 release
+
+* Wed Oct 30 2024 Leigh Scott <leigh123linux@gmail.com> - 3:565.57.01-2
+- Fix linker issue
+
+* Tue Oct 22 2024 Leigh Scott <leigh123linux@gmail.com> - 3:565.57.01-1
+- Update to 565.57.01 beta
+
+* Wed Aug 21 2024 Leigh Scott <leigh123linux@gmail.com> - 3:560.35.03-1
+- Update to 560.35.03 Release
+
+* Mon Aug 19 2024 Leigh Scott <leigh123linux@gmail.com> - 3:560.31.02-2
+- Enable nvidia fbdev
+- Fix nvidia framebuffer with 6.11rc
+
+* Tue Aug 06 2024 Leigh Scott <leigh123linux@gmail.com> - 3:560.31.02-1
+- Update to 560.31.02 beta
+
+* Sat Aug 03 2024 RPM Fusion Release Engineering <sergiomb@rpmfusion.org> - 3:560.28.03-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Tue Jul 23 2024 Leigh Scott <leigh123linux@gmail.com> - 3:560.28.03-1
+- Update to 560.28.03 beta
+
+* Mon Jul 01 2024 Leigh Scott <leigh123linux@gmail.com> - 3:555.58.02-1
+- Update to 555.58.02
+
+* Thu Jun 27 2024 Leigh Scott <leigh123linux@gmail.com> - 3:555.58-1
+- Update to 555.58 release
+
+* Thu Jun 06 2024 Leigh Scott <leigh123linux@gmail.com> - 3:555.52.04-1
+- Update to 555.52.04 beta
+
+* Sat Jun 01 2024 Leigh Scott <leigh123linux@gmail.com> - 3:555.42.02-2
+- Patch for kernel-6.10rc
+
+* Tue May 21 2024 Leigh Scott <leigh123linux@gmail.com> - 3:555.42.02-1
+- Update to 555.42.02 beta
+
+* Sat May 11 2024 Leigh Scott <leigh123linux@gmail.com> - 3:550.78-3
+- Adjust patch to disable nvidia fbdev
+
+* Sat May 11 2024 Leigh Scott <leigh123linux@gmail.com> - 3:550.78-2
+- Default enable nvidia modeset and fbdev
 
 * Fri Apr 26 2024 Leigh Scott <leigh123linux@gmail.com> - 3:550.78-1
 - Update to 550.78 release
