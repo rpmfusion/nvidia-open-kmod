@@ -47,9 +47,9 @@ kmodtool  --target %{_target_cpu}  --repo rpmfusion --kmodname %{name} --obsolet
 echo "Using original nvidia defaults"
 %else
 echo "Set nvidia to fbdev=1 modeset=1"
-%patch 0 -p1 -d open-gpu-kernel-modules-%{version}
+%patch -P0 -p1 -d open-gpu-kernel-modules-%{version}
 %endif
-%patch 1 -p1 -d open-gpu-kernel-modules-%{version}
+%patch -P1 -p1 -d open-gpu-kernel-modules-%{version}
 
 for kernel_version  in %{?kernel_versions} ; do
     cp -a open-gpu-kernel-modules-%{version} _kmod_build_${kernel_version%%___*}
