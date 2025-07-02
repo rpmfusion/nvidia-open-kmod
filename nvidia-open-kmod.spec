@@ -11,7 +11,7 @@
 
 Name:          nvidia-open-kmod
 Epoch:         3
-Version:       575.64
+Version:       575.64.03
 # Taken over by kmodtool
 Release:       1%{?dist}
 Summary:       NVIDIA open display driver kernel module
@@ -47,9 +47,9 @@ kmodtool  --target %{_target_cpu}  --repo rpmfusion --kmodname %{name} --obsolet
 echo "Using original nvidia defaults"
 %else
 echo "Set nvidia to fbdev=1 modeset=1"
-%patch 0 -p1 -d open-gpu-kernel-modules-%{version}
+%patch -P0 -p1 -d open-gpu-kernel-modules-%{version}
 %endif
-%patch 1 -p1 -d open-gpu-kernel-modules-%{version}
+%patch -P1 -p1 -d open-gpu-kernel-modules-%{version}
 
 for kernel_version  in %{?kernel_versions} ; do
     cp -a open-gpu-kernel-modules-%{version} _kmod_build_${kernel_version%%___*}
@@ -84,6 +84,9 @@ done
 
 
 %changelog
+* Wed Jul 02 2025 Leigh Scott <leigh123linux@gmail.com> - 3:575.64.03-1
+- Update to 575.64.03 release
+
 * Tue Jun 17 2025 Leigh Scott <leigh123linux@gmail.com> - 3:575.64-1
 - Update to 575.64 release
 
