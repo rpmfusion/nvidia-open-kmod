@@ -13,7 +13,7 @@ Name:          nvidia-open-kmod
 Epoch:         3
 Version:       580.105.08
 # Taken over by kmodtool
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
@@ -22,6 +22,8 @@ Source0:       %{url}/archive/%{version}/open-gpu-kernel-modules-%{version}.tar.
 Source11:      nvidia-open-kmodtool-excludekernel-filterfile
 Patch0:        make_modeset_default.patch
 Patch1:        linker_fix.patch
+Patch2:        hdmi-regression-fix.patch
+Patch3:        buildfix_kernel-618.patch
 
 ExclusiveArch:  x86_64 aarch64
 
@@ -42,6 +44,8 @@ The nvidia open %{version} display driver kernel module for kernel %{kversion}.
 # print kmodtool output for debugging purposes:
 kmodtool  --target %{_target_cpu}  --repo rpmfusion --kmodname %{name} --obsolete-name nvidia-kmod --obsolete-version %{version}-0.1 --filterfile %{SOURCE11} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null
 %setup -q -c
+%patch -P2 -p1 -d open-gpu-kernel-modules-%{version}
+%patch -P3 -p1 -d open-gpu-kernel-modules-%{version}
 # patch loop
 %if 0%{?_with_nvidia_defaults:1}
 echo "Using original nvidia defaults"
@@ -84,6 +88,10 @@ done
 
 
 %changelog
+* Mon Nov 17 2025 Leigh Scott <leigh123linux@gmail.com> - 3:580.105.08-2
+- Add patch for 6.18rc kernel
+- Limit default maximum TMDS character rate to 340MHz instead of 165MHz
+
 * Sun Nov 09 2025 Leigh Scott <leigh123linux@gmail.com> - 3:580.105.08-1
 - Update to 580.105.08 release
 
@@ -283,4 +291,3 @@ done
 
 * Wed May 11 2022 Leigh Scott <leigh123linux@gmail.com> - 3:515.43.04-1
 - Update to 515.43.04 beta
-
