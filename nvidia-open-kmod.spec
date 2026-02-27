@@ -3,6 +3,16 @@
 # SPDX-License-Identifier: AGPL-3.0
 #
 
+%{?_with_kmodtool_buildforkernels_newest:
+%global kmodtool_buildforkernels newest
+%global kmodtool_dist %(date +%y%m%d%H%M)
+}
+%{?_with_kmodtool_buildforkernels_current:
+%global kmodtool_buildforkernels current
+}
+%{?_with_kmodtool_buildforkernels_akmod:
+%global kmodtool_buildforkernels akmod
+}
 %if 0%{?kmodtool_buildforkernels:1}
 %global buildforkernels %{?kmodtool_buildforkernels}
 %else
