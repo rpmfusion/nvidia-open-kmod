@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: AGPL-3.0
 #
 
-%if 0%{?fedora}
+%if 0%{?kmodtool_buildforkernels:1}
+%global buildforkernels %{?kmodtool_buildforkernels}
+%else
 %global buildforkernels akmod
 %endif
 %global debug_package %{nil}
@@ -13,7 +15,7 @@ Name:          nvidia-open-kmod
 Epoch:         3
 Version:       590.48.01
 # Taken over by kmodtool
-Release:       2%{?dist}
+Release:       2%{?kmodtool_dist}%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
