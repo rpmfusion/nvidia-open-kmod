@@ -1,11 +1,11 @@
---- a/src/nvidia/Makefile
-+++ b/src/nvidia/Makefile
-@@ -208,8 +208,6 @@ all: $(NV_KERNEL_O)
+diff -uNrp a/src/nvidia/Makefile b/src/nvidia/Makefile
+--- a/src/nvidia/Makefile	2026-03-05 17:01:55.000000000 +0000
++++ b/src/nvidia/Makefile	2026-03-05 23:50:39.315701363 +0000
+@@ -208,7 +208,6 @@ all: $(NV_KERNEL_O)
  
  LINKER_SCRIPT = nv-kernel.ld
  
 -NV_KERNEL_O_LDFLAGS += $(LDFLAGS)
--
- $(NV_KERNEL_O): $(OBJS) $(EXPORTS_LINK_COMMAND) $(LINKER_SCRIPT)
- 	$(call quiet_cmd,LD) \
- 	  $(NV_KERNEL_O_LDFLAGS) \
+ NV_KERNEL_O_LDFLAGS += -T $(LINKER_SCRIPT)
+ 
+ 

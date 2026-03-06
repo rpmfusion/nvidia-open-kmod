@@ -19,21 +19,19 @@
 %global buildforkernels akmod
 %endif
 %global debug_package %{nil}
-%global _kmodtool_zipmodules 0
 
 Name:          nvidia-open-kmod
 Epoch:         3
-Version:       590.48.01
+Version:       595.45.04
 # Taken over by kmodtool
-Release:       2%{?kmodtool_dist}%{?dist}
+Release:       1%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
 
 Source0:       %{url}/archive/%{version}/open-gpu-kernel-modules-%{version}.tar.gz
 Source11:      nvidia-open-kmodtool-excludekernel-filterfile
-Patch0:        make_modeset_default.patch
-Patch1:        linker_fix.patch
+Patch0:        linker_fix.patch
 
 ExclusiveArch:  x86_64 aarch64
 
@@ -55,13 +53,7 @@ The nvidia open %{version} display driver kernel module for kernel %{kversion}.
 kmodtool  --target %{_target_cpu}  --repo rpmfusion --kmodname %{name} --obsolete-name nvidia-kmod --obsolete-version %{version}-0.1 --filterfile %{SOURCE11} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null
 %setup -q -c
 # patch loop
-%if 0%{?_with_nvidia_defaults:1}
-echo "Using original nvidia defaults"
-%else
-echo "Set nvidia to fbdev=1 modeset=1"
 %patch -P0 -p1 -d open-gpu-kernel-modules-%{version}
-%endif
-%patch -P1 -p1 -d open-gpu-kernel-modules-%{version}
 
 for kernel_version  in %{?kernel_versions} ; do
     cp -a open-gpu-kernel-modules-%{version} _kmod_build_${kernel_version%%___*}
@@ -96,6 +88,9 @@ done
 
 
 %changelog
+* Fri Mar 06 2026 Leigh Scott <leigh123linux@gmail.com> - 3:595.45.04-1
+- Update to 595.45.04 beta
+
 * Mon Feb 02 2026 RPM Fusion Release Engineering <sergiomb@rpmfusion.org> - 3:590.48.01-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_44_Mass_Rebuild
 
