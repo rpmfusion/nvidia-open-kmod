@@ -36,6 +36,7 @@ URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
 Source0:       %{url}/archive/%{version}/open-gpu-kernel-modules-%{version}.tar.gz
 Source11:      nvidia-open-kmodtool-excludekernel-filterfile
 Patch0:        linker_fix.patch
+Patch1:        set_driver_defaults.patch
 
 ExclusiveArch:  x86_64 aarch64
 
