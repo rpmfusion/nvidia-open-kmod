@@ -20,6 +20,10 @@
 %endif
 %global debug_package %{nil}
 
+%{?_without_kmodtool_zipmodules:
+%global _kmodtool_zipmodules 0
+}
+
 Name:          nvidia-open-kmod
 Epoch:         3
 Version:       595.45.04
