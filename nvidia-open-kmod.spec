@@ -53,7 +53,14 @@ The nvidia open %{version} display driver kernel module for kernel %{kversion}.
 kmodtool  --target %{_target_cpu}  --repo rpmfusion --kmodname %{name} --obsolete-name nvidia-kmod --obsolete-version %{version}-0.1 --filterfile %{SOURCE11} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null
 %setup -q -c
 # patch loop
+%if 0%{?_with_nvidia_defaults:1}
+echo "Using original nvidia defaults"
+%else
+# Fix linker
 %patch -P0 -p1 -d open-gpu-kernel-modules-%{version}
+echo "Set nvidia to notifiers=1 and memoryallocations=1"
+%patch -P1 -p1 -d open-gpu-kernel-modules-%{version}
+%endif
 
 for kernel_version  in %{?kernel_versions} ; do
     cp -a open-gpu-kernel-modules-%{version} _kmod_build_${kernel_version%%___*}
