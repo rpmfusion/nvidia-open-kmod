@@ -26,9 +26,9 @@
 
 Name:          nvidia-open-kmod
 Epoch:         3
-Version:       595.45.04
+Version:       595.58.03
 # Taken over by kmodtool
-Release:       2%{?dist}
+Release:       1%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
@@ -100,6 +100,9 @@ done
 
 
 %changelog
+* Tue Mar 24 2026 Leigh Scott <leigh123linux@gmail.com> - 3:595.58.03-1
+- Update to 595.58.03 release
+
 * Fri Mar 20 2026 Nicolas Chauvet <kwizart@gmail.com> - 3:595.45.04-2
 - Restore --with nvidia_defaults
 - Change the default path for kernel-open - rfbz#7428
