@@ -26,9 +26,9 @@
 
 Name:          nvidia-open-kmod
 Epoch:         3
-Version:       595.58.03
+Version:       595.71.05
 # Taken over by kmodtool
-Release:       3%{?dist}
+Release:       1%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
@@ -105,6 +105,9 @@ done
 
 
 %changelog
+* Tue Apr 28 2026 Leigh Scott <leigh123linux@gmail.com> - 3:595.71.05-1
+- Update to 595.71.05 release
+
 * Thu Apr 16 2026 Nicolas Chauvet <kwizart@gmail.com> - 3:595.58.03-3
 - Add missing epoch
 
