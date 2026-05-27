@@ -1,19 +1,19 @@
 diff -uNrp a/kernel-open/nvidia/nv-reg.h b/kernel-open/nvidia/nv-reg.h
---- a/kernel-open/nvidia/nv-reg.h	2026-02-27 17:30:14.000000000 +0000
-+++ b/kernel-open/nvidia/nv-reg.h	2026-03-11 23:50:04.847097147 +0000
-@@ -1087,7 +1087,7 @@ NV_DEFINE_REG_ENTRY_GLOBAL(__NV_CREATE_I
- NV_DEFINE_REG_ENTRY_GLOBAL(__NV_GRDMA_PCI_TOPO_CHECK_OVERRIDE,
-                            NV_REG_GRDMA_PCI_TOPO_CHECK_OVERRIDE_DEFAULT);
+--- a/kernel-open/nvidia/nv-reg.h	2026-05-19 12:24:37.000000000 +0100
++++ b/kernel-open/nvidia/nv-reg.h	2026-05-26 16:35:19.097819584 +0100
+@@ -1072,7 +1072,7 @@ NV_DEFINE_REG_ENTRY_GLOBAL(__NV_IMEX_CHA
+ NV_DEFINE_REG_ENTRY_GLOBAL(__NV_CREATE_IMEX_CHANNEL_0, 0);
  NV_DEFINE_REG_ENTRY_GLOBAL(__NV_ENABLE_SYSTEM_MEMORY_POOLS, NV_ENABLE_SYSTEM_MEMORY_POOLS_DEFAULT);
+ NV_DEFINE_REG_ENTRY_GLOBAL(__NV_OS_ENABLE_CXL_SUPPORT, 1);
 -NV_DEFINE_REG_ENTRY_GLOBAL(__NV_USE_KERNEL_SUSPEND_NOTIFIERS, 0);
 +NV_DEFINE_REG_ENTRY_GLOBAL(__NV_USE_KERNEL_SUSPEND_NOTIFIERS, 1);
- 
+ NV_DEFINE_REG_ENTRY(__NV_ENABLE_NON_PREEMTABLE_DEBUGGER_SESSION, 0);
  /*
   *----------------registry database definition----------------------
 diff -uNrp a/kernel-open/nvidia/os-interface.c b/kernel-open/nvidia/os-interface.c
---- a/kernel-open/nvidia/os-interface.c	2026-02-27 17:30:11.000000000 +0000
-+++ b/kernel-open/nvidia/os-interface.c	2026-03-11 23:53:09.842740948 +0000
-@@ -1851,7 +1851,7 @@ NV_STATUS NV_API_CALL os_open_temporary_
+--- a/kernel-open/nvidia/os-interface.c	2026-05-19 12:24:33.000000000 +0100
++++ b/kernel-open/nvidia/os-interface.c	2026-05-26 16:32:52.829160397 +0100
+@@ -1855,7 +1855,7 @@ NV_STATUS NV_API_CALL os_open_temporary_
  #if NV_FILESYSTEM_ACCESS_AVAILABLE
  #if defined(O_TMPFILE)
      struct file *file;
