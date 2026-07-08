@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: AGPL-3.0
 #
 
+# Build flags are inherited from the kernel
+%undefine _auto_set_build_flags
+
 %{?_with_kmodtool_buildforkernels_newest:
 %global kmodtool_buildforkernels newest
 %global kmodtool_dist %(date +%y%m%d%H%M)
@@ -28,7 +31,7 @@ Name:          nvidia-open-kmod
 Epoch:         3
 Version:       610.43.03
 # Taken over by kmodtool
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
@@ -76,7 +79,6 @@ for kernel_version in %{?kernel_versions} ; do
     cp -a open-gpu-kernel-modules-%{version} _kmod_build_${kernel_version%%___*}
 done
 
-
 %build
 %if 0%{?_without_nvidia_uvm:1}
 export NV_EXCLUDE_KERNEL_MODULES="${NV_EXCLUDE_KERNEL_MODULES} nvidia_uvm "
@@ -86,14 +88,6 @@ export NV_EXCLUDE_KERNEL_MODULES="${NV_EXCLUDE_KERNEL_MODULES} nvidia_modeset "
 %endif
 
 for kernel_version in %{?kernel_versions}; do
-  pushd _kmod_build_${kernel_version%%___*}/src/nvidia/
-      # Explicitly clear the breaking Fedora flags for this sub-make
-      LDFLAGS="" CFLAGS="" CXXFLAGS="" %make_build
-  popd
-  pushd _kmod_build_${kernel_version%%___*}/src/nvidia-modeset/
-      # Explicitly clear the breaking Fedora flags for this sub-make
-      LDFLAGS="" CFLAGS="" CXXFLAGS="" %make_build
-  popd
   pushd _kmod_build_${kernel_version%%___*}/
     %make_build \
         KERNEL_UNAME="${kernel_version%%___*}" SYSSRC="${kernel_version##*___}" \
@@ -114,6 +108,9 @@ done
 
 
 %changelog
+* Wed Jul 08 2026 Leigh Scott <leigh123linux@gmail.com> - 3:610.43.03-3
+- Use undefine auto_set_build_flags
+
 * Wed Jul 08 2026 Leigh Scott <leigh123linux@gmail.com> - 3:610.43.03-2
 - Remove the linker patch for the object files
 - Build object files without any flags
