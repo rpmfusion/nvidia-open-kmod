@@ -1,0 +1,285 @@
+From c68c36804f88d75df35d2071c63f430704b467b8 Mon Sep 17 00:00:00 2001
+From: ThePedroo <pedroolimpioguerra@gmail.com>
+Date: Tue, 30 Jun 2026 22:57:25 -0300
+Subject: [PATCH] fix: use `strscpy` instead of `strncpy` in kernel drive code
+
+This commit replaces all usages of "strncpy" to use "strscpy". Since Linux 7.2-rc.1, "strncpy" has been fully removed from the source, and cannot be used by drivers anymore (see https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=1a3746ccbb0a97bed3c06ccde6b880013b1dddc1). We also replace one of the "strncpy" for "memcpy", since "strscpy" is not suitable either here, due to always NUL terminate.
+---
+ kernel-open/nvidia-modeset/nvidia-modeset-linux.c    |  4 ++--
+ .../nvidia-modeset/nvidia-modeset-os-interface.h     |  4 ++--
+ kernel-open/nvidia-uvm/uvm_pmm_gpu.c                 |  2 +-
+ kernel-open/nvidia/export_nvswitch.h                 |  6 +++---
+ kernel-open/nvidia/linux_nvswitch.c                  | 10 +++++-----
+ kernel-open/nvidia/os-interface.c                    |  3 +--
+ src/common/nvswitch/interface/export_nvswitch.h      | 12 +++++++++---
+ src/common/nvswitch/kernel/ls10/smbpbi_ls10.c        |  3 +--
+ src/common/nvswitch/kernel/nvswitch.c                |  4 +---
+ src/nvidia-modeset/kapi/src/nvkms-kapi.c             |  2 +-
+ .../include/nvidia-modeset-os-interface.h            |  6 ++++--
+ src/nvidia-modeset/src/dp/nvdp-device.cpp            |  2 +-
+ src/nvidia-modeset/src/nvkms-dpy.c                   |  4 +---
+ src/nvidia-modeset/src/nvkms-modepool.c              |  3 +--
+ 14 files changed, 33 insertions(+), 32 deletions(-)
+
+diff --git a/kernel-open/nvidia-modeset/nvidia-modeset-linux.c b/kernel-open/nvidia-modeset/nvidia-modeset-linux.c
+index 8c2cf3740b..7d46c50b96 100644
+--- a/kernel-open/nvidia-modeset/nvidia-modeset-linux.c
++++ b/kernel-open/nvidia-modeset/nvidia-modeset-linux.c
+@@ -664,9 +664,9 @@ int nvkms_strcmp(const char *s1, const char *s2)
+     return strcmp(s1, s2);
+ }
+ 
+-char* nvkms_strncpy(char *dest, const char *src, size_t n)
++ssize_t nvkms_strscpy(char *dest, const char *src, size_t count)
+ {
+-    return strncpy(dest, src, n);
++    return strscpy(dest, src, count);
+ }
+ 
+ void nvkms_usleep(NvU64 usec)
+diff --git a/kernel-open/nvidia-modeset/nvidia-modeset-os-interface.h b/kernel-open/nvidia-modeset/nvidia-modeset-os-interface.h
+index a634ec2bcc..bcac52e874 100644
+--- a/kernel-open/nvidia-modeset/nvidia-modeset-os-interface.h
++++ b/kernel-open/nvidia-modeset/nvidia-modeset-os-interface.h
+@@ -149,9 +149,9 @@ int    nvkms_memcmp     (const void *s1,
+ size_t nvkms_strlen     (const char *s);
+ int    nvkms_strcmp     (const char *s1,
+                          const char *s2);
+-char*  nvkms_strncpy    (char *dest,
++ssize_t nvkms_strscpy   (char *dest,
+                          const char *src,
+-                         size_t n);
++                         size_t count);
+ void   nvkms_usleep     (NvU64 usec);
+ NvU64  nvkms_get_usec   (void);
+ int    nvkms_copyin     (void *kptr,
+diff --git a/kernel-open/nvidia-uvm/uvm_pmm_gpu.c b/kernel-open/nvidia-uvm/uvm_pmm_gpu.c
+index 34e56f2272..af78b65337 100644
+--- a/kernel-open/nvidia-uvm/uvm_pmm_gpu.c
++++ b/kernel-open/nvidia-uvm/uvm_pmm_gpu.c
+@@ -2804,7 +2804,7 @@ static NV_STATUS init_chunk_split_cache_level(uvm_pmm_gpu_t *pmm, size_t level)
+             size_t size;
+             size_t align;
+             if (level == 0) {
+-                strncpy(chunk_split_cache[level].name, "uvm_gpu_chunk_t", sizeof(chunk_split_cache[level].name) - 1);
++                strscpy(chunk_split_cache[level].name, "uvm_gpu_chunk_t", sizeof(chunk_split_cache[level].name));
+                 size = sizeof(uvm_gpu_chunk_t);
+                 align = __alignof__(uvm_gpu_chunk_t);
+             } else {
+diff --git a/kernel-open/nvidia/export_nvswitch.h b/kernel-open/nvidia/export_nvswitch.h
+index c3ef36c793..d02222cb77 100644
+--- a/kernel-open/nvidia/export_nvswitch.h
++++ b/kernel-open/nvidia/export_nvswitch.h
+@@ -807,12 +807,12 @@ nvswitch_os_strlen
+     const char *str
+ );
+ 
+-char*
+-nvswitch_os_strncpy
++ssize_t
++nvswitch_os_strscpy
+ (
+     char *pDest,
+     const char *pSrc,
+-    NvLength length
++    NvLength count
+ );
+ 
+ int
+diff --git a/kernel-open/nvidia/linux_nvswitch.c b/kernel-open/nvidia/linux_nvswitch.c
+index 015de1ca66..1f5ab4a7ae 100644
+--- a/kernel-open/nvidia/linux_nvswitch.c
++++ b/kernel-open/nvidia/linux_nvswitch.c
+@@ -2059,7 +2059,7 @@ nvswitch_os_read_registry_dword
+         return -NVL_ERR_GENERIC;
+     }
+ 
+-    strncpy(regkey_val, regkey_val_start, regkey_val_len);
++    memcpy(regkey_val, regkey_val_start, regkey_val_len);
+     regkey_val[regkey_val_len] = '\0';
+ 
+     if (nvswitch_os_strtouint(regkey_val, data) != 0)
+@@ -2406,15 +2406,15 @@ nvswitch_os_strlen
+     return strlen(str);
+ }
+ 
+-char*
+-nvswitch_os_strncpy
++ssize_t
++nvswitch_os_strscpy
+ (
+     char *dest,
+     const char *src,
+-    NvLength length
++    NvLength count
+ )
+ {
+-    return strncpy(dest, src, length);
++    return strscpy(dest, src, count);
+ }
+ 
+ int
+diff --git a/kernel-open/nvidia/os-interface.c b/kernel-open/nvidia/os-interface.c
+index ebbd236ad9..7df5e59a51 100644
+--- a/kernel-open/nvidia/os-interface.c
++++ b/kernel-open/nvidia/os-interface.c
+@@ -770,8 +770,7 @@ NvU32 NV_API_CALL os_get_current_process(void)
+ void NV_API_CALL os_get_current_process_name(char *buf, NvU32 len)
+ {
+     task_lock(current);
+-    strncpy(buf, current->comm, len - 1);
+-    buf[len - 1] = '\0';
++    strscpy(buf, current->comm, len);
+     task_unlock(current);
+ }
+ 
+diff --git a/src/common/nvswitch/interface/export_nvswitch.h b/src/common/nvswitch/interface/export_nvswitch.h
+index bc39fa61dc..79de6651be 100644
+--- a/src/common/nvswitch/interface/export_nvswitch.h
++++ b/src/common/nvswitch/interface/export_nvswitch.h
+@@ -28,6 +28,12 @@
+ extern "C" {
+ #endif
+ 
++#if defined(NV_KERNEL_INTERFACE_LAYER) && defined(NV_LINUX)
++#include <linux/types.h>  /* ssize_t */
++#else
++#include <sys/types.h>   /* ssize_t */
++#endif
++
+ #include "nv_stdarg.h"
+ #include "nvlink_common.h"
+ #include "ioctl_common_nvswitch.h"
+@@ -803,12 +809,12 @@ nvswitch_os_strlen
+     const char *str
+ );
+ 
+-char*
+-nvswitch_os_strncpy
++ssize_t
++nvswitch_os_strscpy
+ (
+     char *pDest,
+     const char *pSrc,
+-    NvLength length
++    NvLength count
+ );
+ 
+ int
+diff --git a/src/common/nvswitch/kernel/ls10/smbpbi_ls10.c b/src/common/nvswitch/kernel/ls10/smbpbi_ls10.c
+index 958f8a18f1..0f5063fb69 100644
+--- a/src/common/nvswitch/kernel/ls10/smbpbi_ls10.c
++++ b/src/common/nvswitch/kernel/ls10/smbpbi_ls10.c
+@@ -178,10 +178,9 @@ nvswitch_smbpbi_send_init_data_ls10
+     cmd.hdr.size   = RM_SOE_CMD_SIZE(SMBPBI, INIT_DATA);
+     cmd.cmd.smbpbiCmd.cmdType = RM_SOE_SMBPBI_CMD_ID_INIT_DATA;
+ 
+-    nvswitch_os_strncpy((char *)pInitDataCmd->driverVersionString,
++    nvswitch_os_strscpy((char *)pInitDataCmd->driverVersionString,
+                         NV_VERSION_STRING,
+                         sizeof(pInitDataCmd->driverVersionString));
+-    pInitDataCmd->driverVersionString[sizeof(pInitDataCmd->driverVersionString) - 1] = 0;
+ 
+     nvswitch_timeout_create(NVSWITCH_INTERVAL_1SEC_IN_NS, &timeout);
+     status = flcnQueueCmdPostBlocking(device, pFlcn,
+diff --git a/src/common/nvswitch/kernel/nvswitch.c b/src/common/nvswitch/kernel/nvswitch.c
+index 384396391c..b00a8bf41c 100644
+--- a/src/common/nvswitch/kernel/nvswitch.c
++++ b/src/common/nvswitch/kernel/nvswitch.c
+@@ -729,9 +729,7 @@ nvswitch_lib_check_api_version
+     }
+ 
+     nvswitch_os_memset(kernel_version, 0x0, length);
+-    nvswitch_os_strncpy(kernel_version, NV_VERSION_STRING, VERSION_LENGTH);
+-
+-    kernel_version[length - 1] = '\0';
++    nvswitch_os_strscpy(kernel_version, NV_VERSION_STRING, VERSION_LENGTH);
+ 
+     if (nvswitch_os_strncmp(user_version, kernel_version, VERSION_LENGTH))
+     {
+diff --git a/src/nvidia-modeset/kapi/src/nvkms-kapi.c b/src/nvidia-modeset/kapi/src/nvkms-kapi.c
+index 51178eeec1..6cd0dbe3b8 100644
+--- a/src/nvidia-modeset/kapi/src/nvkms-kapi.c
++++ b/src/nvidia-modeset/kapi/src/nvkms-kapi.c
+@@ -475,7 +475,7 @@ static NvBool KmsAllocateDevice(struct NvKmsKapiDevice *device)
+ 
+     /* Allocate NVKMS device */
+ 
+-    nvkms_strncpy(
++    nvkms_strscpy(
+         paramsAlloc->request.versionString,
+         NV_VERSION_STRING,
+         sizeof(paramsAlloc->request.versionString));
+diff --git a/src/nvidia-modeset/os-interface/include/nvidia-modeset-os-interface.h b/src/nvidia-modeset/os-interface/include/nvidia-modeset-os-interface.h
+index a634ec2bcc..4db6acbf5b 100644
+--- a/src/nvidia-modeset/os-interface/include/nvidia-modeset-os-interface.h
++++ b/src/nvidia-modeset/os-interface/include/nvidia-modeset-os-interface.h
+@@ -31,8 +31,10 @@
+ 
+ #if defined(NV_KERNEL_INTERFACE_LAYER) && defined(NV_LINUX)
+ #include <linux/stddef.h>  /* size_t */
++#include <linux/types.h>   /* ssize_t */
+ #else
+ #include <stddef.h>        /* size_t */
++#include <sys/types.h>     /* ssize_t */
+ #endif
+ #include "nvtypes.h" /* NvU8 */
+ 
+@@ -149,9 +151,9 @@ int    nvkms_memcmp     (const void *s1,
+ size_t nvkms_strlen     (const char *s);
+ int    nvkms_strcmp     (const char *s1,
+                          const char *s2);
+-char*  nvkms_strncpy    (char *dest,
++ssize_t nvkms_strscpy    (char *dest,
+                          const char *src,
+-                         size_t n);
++                         size_t count);
+ void   nvkms_usleep     (NvU64 usec);
+ NvU64  nvkms_get_usec   (void);
+ int    nvkms_copyin     (void *kptr,
+diff --git a/src/nvidia-modeset/src/dp/nvdp-device.cpp b/src/nvidia-modeset/src/dp/nvdp-device.cpp
+index f9015042d3..5741a224f7 100644
+--- a/src/nvidia-modeset/src/dp/nvdp-device.cpp
++++ b/src/nvidia-modeset/src/dp/nvdp-device.cpp
+@@ -124,7 +124,7 @@ void nvDPGetDpyGUID(NVDpyEvoPtr pDpyEvo)
+ 
+     str = nvkmsDisplayPort::nvDPGetDeviceGUIDStr(pDpLibDevice->device);
+     if (str != NULL) {
+-        nvkms_strncpy(pDpyEvo->dp.guid.str, str, sizeof(pDpyEvo->dp.guid.str));
++        nvkms_strscpy(pDpyEvo->dp.guid.str, str, sizeof(pDpyEvo->dp.guid.str));
+     } else {
+         pDpyEvo->dp.guid.valid = FALSE;
+     }
+diff --git a/src/nvidia-modeset/src/nvkms-dpy.c b/src/nvidia-modeset/src/nvkms-dpy.c
+index 7fc92fcfd7..682dff2533 100644
+--- a/src/nvidia-modeset/src/nvkms-dpy.c
++++ b/src/nvidia-modeset/src/nvkms-dpy.c
+@@ -2311,12 +2311,10 @@ static void PatchAndParseEdid(
+ 
+     for (i = 0; i < NVT_EDID_MAX_LONG_DISPLAY_DESCRIPTOR; i++) {
+         if (pParsedEdid->info.ldd[i].tag == NVT_EDID_DISPLAY_DESCRIPTOR_DPSN) {
+-            nvkms_strncpy(
++            nvkms_strscpy(
+                 pParsedEdid->serialNumberString,
+                 (const char *)pParsedEdid->info.ldd[i].u.serial_number.str,
+                 sizeof(pParsedEdid->serialNumberString));
+-            pParsedEdid->serialNumberString[
+-                sizeof(pParsedEdid->serialNumberString) - 1] = '\0';
+             break;
+         }
+     }
+diff --git a/src/nvidia-modeset/src/nvkms-modepool.c b/src/nvidia-modeset/src/nvkms-modepool.c
+index 7b6ca75441..460e69948c 100644
+--- a/src/nvidia-modeset/src/nvkms-modepool.c
++++ b/src/nvidia-modeset/src/nvkms-modepool.c
+@@ -522,9 +522,8 @@ ValidateModeIndexEdid(NVDpyEvoPtr pDpyEvo,
+ 
+         if (description != NULL) {
+             nvAssert(nvkms_strlen(description) < sizeof(pReply->description));
+-            nvkms_strncpy(pReply->description, description,
++            nvkms_strscpy(pReply->description, description,
+                           sizeof(pReply->description));
+-            pReply->description[sizeof(pReply->description) - 1] = '\0';
+         }
+ 
+         nvBuildModeName(kmsMode.timings.hVisible, kmsMode.timings.vVisible,

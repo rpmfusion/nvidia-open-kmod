@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: AGPL-3.0
 #
 
+# Build flags are inherited from the kernel
+%undefine _auto_set_build_flags
+
 %{?_with_kmodtool_buildforkernels_newest:
 %global kmodtool_buildforkernels newest
 %global kmodtool_dist %(date +%y%m%d%H%M)
@@ -28,15 +31,18 @@ Name:          nvidia-open-kmod
 Epoch:         3
 Version:       610.43.03
 # Taken over by kmodtool
-Release:       1%{?dist}
+Release:       3%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
 
 Source0:       %{url}/archive/%{version}/open-gpu-kernel-modules-%{version}.tar.gz
 Source11:      nvidia-open-kmodtool-excludekernel-filterfile
-Patch0:        linker_fix.patch
-Patch1:        set_driver_defaults.patch
+Patch0:        set_driver_defaults.patch
+
+# kernel-7.2rc
+Patch1:        adfae267afa54919b2b197864a6751259ce21359.patch
+Patch2:        c68c36804f88d75df35d2071c63f430704b467b8.patch
 
 ExclusiveArch:  x86_64 aarch64
 
@@ -61,13 +67,15 @@ kmodtool  --target %{_target_cpu}  --repo rpmfusion --kmodname %{name} --obsolet
 %if 0%{?_with_nvidia_defaults:1}
 echo "Using original nvidia defaults"
 %else
-# Fix linker
-%patch -P0 -p1 -d open-gpu-kernel-modules-%{version}
 echo "Set nvidia to notifiers=1 and memoryallocations=1"
+%patch -P0 -p1 -d open-gpu-kernel-modules-%{version}
+%endif
+%if 0%{?fedora} >= 45
 %patch -P1 -p1 -d open-gpu-kernel-modules-%{version}
+%patch -P2 -p1 -d open-gpu-kernel-modules-%{version}
 %endif
 
-for kernel_version  in %{?kernel_versions} ; do
+for kernel_version in %{?kernel_versions} ; do
     cp -a open-gpu-kernel-modules-%{version} _kmod_build_${kernel_version%%___*}
 done
 
@@ -100,6 +108,14 @@ done
 
 
 %changelog
+* Wed Jul 08 2026 Leigh Scott <leigh123linux@gmail.com> - 3:610.43.03-3
+- Use undefine auto_set_build_flags
+
+* Wed Jul 08 2026 Leigh Scott <leigh123linux@gmail.com> - 3:610.43.03-2
+- Remove the linker patch for the object files
+- Build object files without any flags
+- Fix compile with kernel-7.2rc
+
 * Wed Jul 08 2026 Leigh Scott <leigh123linux@gmail.com> - 3:610.43.03-1
 - Update to 610.43.03 release
 
