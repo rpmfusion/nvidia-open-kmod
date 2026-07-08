@@ -1,0 +1,126 @@
+From adfae267afa54919b2b197864a6751259ce21359 Mon Sep 17 00:00:00 2001
+From: ThePedroo <pedroolimpioguerra@gmail.com>
+Date: Wed, 1 Jul 2026 21:07:08 -0300
+Subject: [PATCH] fix: handle `drm_atomic_state` rename to `drm_atomic_commit`
+
+This commit addresses the rename (see https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=5164f7e7ff8e) by adding a new conftest to see if it was renamed, and if so, use it.
+---
+ kernel-open/conftest.sh                      | 27 ++++++++++++++++++++
+ kernel-open/nvidia-drm/nvidia-drm-conftest.h | 13 ++++++++++
+ kernel-open/nvidia-drm/nvidia-drm-crtc.c     | 12 +++++++--
+ kernel-open/nvidia-drm/nvidia-drm-sources.mk |  1 +
+ 4 files changed, 51 insertions(+), 2 deletions(-)
+
+diff --git a/kernel-open/conftest.sh b/kernel-open/conftest.sh
+index 386b3242aa..5c604c6afe 100755
+--- a/kernel-open/conftest.sh
++++ b/kernel-open/conftest.sh
+@@ -3254,6 +3254,33 @@ compile_test() {
+             compile_check_conftest "$CODE" "NV_PTEP_GET_PRESENT" "" "functions"
+         ;;
+ 
++        drm_atomic_commit_present)
++            #
++            # Determine if the kernel has renamed struct drm_atomic_state
++            # to struct drm_atomic_commit.
++            #
++            # Linux kernel commit 5164f7e7ff8e ("drm: Rename struct drm_atomic_state
++            # to drm_atomic_commit") renames the
++            # struct and all associated functions.
++            #
++            echo "$CONFTEST_PREAMBLE
++            #include <drm/drm_atomic.h>
++
++            void conftest(void) {
++                struct drm_atomic_commit *state = NULL;
++            }" > conftest$$.c
++
++            $CC $CFLAGS -c conftest$$.c > /dev/null 2>&1
++            rm -f conftest$$.c
++
++            if [ -f conftest$$.o ]; then
++                rm -f conftest$$.o
++                echo "#define NV_DRM_ATOMIC_COMMIT_PRESENT" | append_conftest "types"
++            else
++                echo "#undef NV_DRM_ATOMIC_COMMIT_PRESENT" | append_conftest "types"
++            fi
++        ;;
++
+         drm_plane_atomic_check_has_atomic_state_arg)
+             #
+             # Determine if drm_plane_helper_funcs::atomic_check takes 'state'
+diff --git a/kernel-open/nvidia-drm/nvidia-drm-conftest.h b/kernel-open/nvidia-drm/nvidia-drm-conftest.h
+index 57e70a81bf..abab9433e2 100644
+--- a/kernel-open/nvidia-drm/nvidia-drm-conftest.h
++++ b/kernel-open/nvidia-drm/nvidia-drm-conftest.h
+@@ -217,4 +217,17 @@ vmf_insert_pfn(struct vm_area_struct *vma, unsigned long addr,
+ 
+ #endif /* defined(NV_BSD) */
+ 
++/*
++ * Kernel commit 5164f7e7ff8e ("drm: Rename struct drm_atomic_state
++ * to drm_atomic_commit") renamed the struct and all associated functions.
++ */
++#if defined(NV_DRM_ATOMIC_COMMIT_PRESENT)
++#define drm_atomic_state            drm_atomic_commit
++#define drm_atomic_state_alloc      drm_atomic_commit_alloc
++#define drm_atomic_state_put        drm_atomic_commit_put
++#define drm_atomic_state_init       drm_atomic_commit_init
++#define drm_atomic_state_default_clear  drm_atomic_commit_default_clear
++#define drm_atomic_state_default_release drm_atomic_commit_default_release
++#endif
++
+ #endif /* defined(__NVIDIA_DRM_CONFTEST_H__) */
+diff --git a/kernel-open/nvidia-drm/nvidia-drm-crtc.c b/kernel-open/nvidia-drm/nvidia-drm-crtc.c
+index 17958f8abe..4e2913843e 100644
+--- a/kernel-open/nvidia-drm/nvidia-drm-crtc.c
++++ b/kernel-open/nvidia-drm/nvidia-drm-crtc.c
+@@ -1607,13 +1607,17 @@ static int __nv_drm_cursor_atomic_check(struct drm_plane *plane,
+ #if defined(NV_DRM_PLANE_ATOMIC_CHECK_HAS_ATOMIC_STATE_ARG)
+ static int nv_drm_plane_atomic_check(struct drm_plane *plane,
+                                      struct drm_atomic_state *state)
++#elif defined(NV_DRM_ATOMIC_COMMIT_PRESENT)
++static int nv_drm_plane_atomic_check(struct drm_plane *plane,
++                                     struct drm_atomic_commit *state)
+ #else
+ static int nv_drm_plane_atomic_check(struct drm_plane *plane,
+                                      struct drm_plane_state *plane_state)
+ #endif
+ {
+     struct nv_drm_plane *nv_plane = to_nv_plane(plane);
+-#if defined(NV_DRM_PLANE_ATOMIC_CHECK_HAS_ATOMIC_STATE_ARG)
++#if defined(NV_DRM_PLANE_ATOMIC_CHECK_HAS_ATOMIC_STATE_ARG) || \
++    defined(NV_DRM_ATOMIC_COMMIT_PRESENT)
+     struct drm_plane_state *plane_state =
+         drm_atomic_get_new_plane_state(state, plane);
+ #endif
+@@ -2611,12 +2615,16 @@ static int color_mgmt_config_set_luts(struct nv_drm_crtc_state *nv_crtc_state,
+ #if defined(NV_DRM_CRTC_ATOMIC_CHECK_HAS_ATOMIC_STATE_ARG)
+ static int nv_drm_crtc_atomic_check(struct drm_crtc *crtc,
+                                     struct drm_atomic_state *state)
++#elif defined(NV_DRM_ATOMIC_COMMIT_PRESENT)
++static int nv_drm_crtc_atomic_check(struct drm_crtc *crtc,
++                                    struct drm_atomic_commit *state)
+ #else
+ static int nv_drm_crtc_atomic_check(struct drm_crtc *crtc,
+                                     struct drm_crtc_state *crtc_state)
+ #endif
+ {
+-#if defined(NV_DRM_CRTC_ATOMIC_CHECK_HAS_ATOMIC_STATE_ARG)
++#if defined(NV_DRM_CRTC_ATOMIC_CHECK_HAS_ATOMIC_STATE_ARG) || \
++    defined(NV_DRM_ATOMIC_COMMIT_PRESENT)
+     struct drm_crtc_state *crtc_state =
+         drm_atomic_get_new_crtc_state(state, crtc);
+ #endif
+diff --git a/kernel-open/nvidia-drm/nvidia-drm-sources.mk b/kernel-open/nvidia-drm/nvidia-drm-sources.mk
+index e656f04242..ae6431611d 100644
+--- a/kernel-open/nvidia-drm/nvidia-drm-sources.mk
++++ b/kernel-open/nvidia-drm/nvidia-drm-sources.mk
+@@ -86,6 +86,7 @@ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_driver_has_gem_prime_callbacks
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_crtc_atomic_check_has_atomic_state_arg
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_gem_object_vmap_has_map_arg
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_plane_atomic_check_has_atomic_state_arg
++NV_CONFTEST_TYPE_COMPILE_TESTS += drm_atomic_commit_present
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_device_has_pdev
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_crtc_state_has_no_vblank
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_mode_config_has_allow_fb_modifiers
