@@ -26,7 +26,7 @@
 
 Name:          nvidia-open-kmod
 Epoch:         3
-Version:       595.80
+Version:       610.43.03
 # Taken over by kmodtool
 Release:       1%{?dist}
 Summary:       NVIDIA open display driver kernel module
@@ -37,8 +37,6 @@ Source0:       %{url}/archive/%{version}/open-gpu-kernel-modules-%{version}.tar.
 Source11:      nvidia-open-kmodtool-excludekernel-filterfile
 Patch0:        linker_fix.patch
 Patch1:        set_driver_defaults.patch
-# https://forums.developer.nvidia.com/t/preview-drm-per-plane-color-pipeline-api-support-for-nvidia-open-gpu-kernel-modules/365381
-Patch2:        https://github.com/AlexGoinsNV/open-gpu-kernel-modules-drm-color-pipeline-preview/commit/c6d0aefd0d4c018d03697f1d867da3bac464fc9f.patch
 
 ExclusiveArch:  x86_64 aarch64
 
@@ -67,9 +65,6 @@ echo "Using original nvidia defaults"
 %patch -P0 -p1 -d open-gpu-kernel-modules-%{version}
 echo "Set nvidia to notifiers=1 and memoryallocations=1"
 %patch -P1 -p1 -d open-gpu-kernel-modules-%{version}
-%if 0%{?_with_nvidia_color_pipeline_preview:1}
-%patch -P2 -p1 -d open-gpu-kernel-modules-%{version}
-%endif
 %endif
 
 for kernel_version  in %{?kernel_versions} ; do
@@ -105,8 +100,11 @@ done
 
 
 %changelog
-* Fri May 29 2026 Leigh Scott <leigh123linux@gmail.com> - 3:595.80-1
-- Update to 595.80 release
+* Wed Jul 08 2026 Leigh Scott <leigh123linux@gmail.com> - 3:610.43.03-1
+- Update to 610.43.03 release
+
+* Tue May 26 2026 Leigh Scott <leigh123linux@gmail.com> - 3:610.43.02-1
+- Update to 610.43.02 release
 
 * Tue Apr 28 2026 Leigh Scott <leigh123linux@gmail.com> - 3:595.71.05-1
 - Update to 595.71.05 release
