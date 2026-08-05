@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: AGPL-3.0
 #
 
+# Build flags are inherited from the kernel
+%undefine _auto_set_build_flags
+
 %if 0%{?fedora}
 %global buildforkernels akmod
 %endif
@@ -11,7 +14,7 @@
 
 Name:          nvidia-open-kmod
 Epoch:         3
-Version:       580.173.02
+Version:       580.178.04
 # Taken over by kmodtool
 Release:       1%{?dist}
 Summary:       NVIDIA open display driver kernel module
@@ -21,7 +24,6 @@ URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
 Source0:       %{url}/archive/%{version}/open-gpu-kernel-modules-%{version}.tar.gz
 Source11:      nvidia-open-kmodtool-excludekernel-filterfile
 Patch0:        make_modeset_default.patch
-Patch1:        linker_fix.patch
 
 ExclusiveArch:  x86_64 aarch64
 
@@ -49,7 +51,6 @@ echo "Using original nvidia defaults"
 echo "Set nvidia to fbdev=1 modeset=1"
 %patch -P0 -p1 -d open-gpu-kernel-modules-%{version}
 %endif
-%patch -P1 -p1 -d open-gpu-kernel-modules-%{version}
 
 for kernel_version  in %{?kernel_versions} ; do
     cp -a open-gpu-kernel-modules-%{version} _kmod_build_${kernel_version%%___*}
@@ -84,6 +85,9 @@ done
 
 
 %changelog
+* Wed Aug 05 2026 Leigh Scott <leigh123linux@gmail.com> - 3:580.178.04-1
+- Update to 580.178.04 release
+
 * Wed Jul 08 2026 Nicolas Chauvet <kwizart@gmail.com> - 3:580.173.02-1
 - Update to 580.173.02
 
