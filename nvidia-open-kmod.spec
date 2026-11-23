@@ -39,6 +39,8 @@ URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
 Source0:       %{url}/archive/%{version}/open-gpu-kernel-modules-%{version}.tar.gz
 Source11:      nvidia-open-kmodtool-excludekernel-filterfile
 Patch0:        set_driver_defaults.patch
+# https://github.com/NVIDIA/open-gpu-kernel-modules/issues/1289#issuecomment-6859474694
+Patch1:        0001-nvkms-Move-nvHsAllocDevice-before-nvAllocLutSurfaces.patch
 
 ExclusiveArch:  x86_64 aarch64
 
@@ -66,6 +68,9 @@ echo "Using original nvidia defaults"
 echo "Set nvidia to notifiers=1 and memoryallocations=1"
 %patch -P0 -p1 -d open-gpu-kernel-modules-%{version}
 %endif
+(cd open-gpu-kernel-modules-%{version}
+%patch -P1 -p1
+)
 
 for kernel_version in %{?kernel_versions} ; do
     cp -a open-gpu-kernel-modules-%{version} _kmod_build_${kernel_version%%___*}
