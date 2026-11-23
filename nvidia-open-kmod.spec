@@ -31,7 +31,7 @@ Name:          nvidia-open-kmod
 Epoch:         3
 Version:       620.73.04
 # Taken over by kmodtool
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       NVIDIA open display driver kernel module
 License:       GPLv2 and MIT
 URL:           https://github.com/NVIDIA/open-gpu-kernel-modules
@@ -105,6 +105,10 @@ done
 
 
 %changelog
+* Mon Nov 23 2026 Nicolas Chauvet <kwizart@gmail.com> - 3:620.73.04-2
+- Fix crash with KDE/Wayland
+- https://github.com/NVIDIA/open-gpu-kernel-modules/issues/1289
+
 * Thu Nov 19 2026 Leigh Scott <leigh123linux@gmail.com> - 3:620.73.04-1
 - Update to 620.73.04 release
 
